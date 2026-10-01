@@ -1,6 +1,6 @@
 // Web Audio API sound generator - no external MP3 dependencies required
 
-export type AmbientSoundType = 'none' | 'rain' | 'binaural' | 'whitenoise' | 'zen';
+export type AmbientSoundType = 'none' | 'lluvia' | 'ruidoblanco' | 'cafe' | 'binaural';
 
 class SoundManager {
   private ctx: AudioContext | null = null;
@@ -8,8 +8,8 @@ class SoundManager {
   private ambientSource: AudioNode | null = null;
   private ambientGain: GainNode | null = null;
   private currentAmbientType: AmbientSoundType = 'none';
-  private ambientVolume: number = 0.35;
-  private activeIntervals: number[] = [];
+  private ambientVolume: number = 0.40;
+  private cafeClinkInterval: NodeJS.Timeout | null = null;
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -47,7 +47,7 @@ class SoundManager {
   public setAmbientVolume(vol: number) {
     this.ambientVolume = Math.max(0, Math.min(1, vol));
     if (this.ambientGain && this.ctx) {
-      this.ambientGain.gain.setValueAtTime(this.ambientVolume * 0.4, this.ctx.currentTime);
+      this.ambientGain.gain.setValueAtTime(this.ambientVolume * 0.45, this.ctx.currentTime);
     }
   }
 
@@ -184,7 +184,7 @@ class SoundManager {
     osc.stop(now + 0.35);
   }
 
-  // Ambient sound synthesis (Lluvia, Ruido Marrón, Ondas Binaurales 40Hz, Viento Zen)
+  // Ambient sound synthesis: Lluvia, Ruido Blanco, Café de Estudio, Ondas Binaurales
   public startAmbient(type: AmbientSoundType) {
     this.stopAmbient();
     if (type === 'none' || !this.soundEnabled) {
@@ -198,31 +198,40 @@ class SoundManager {
     this.currentAmbientType = type;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(this.ambientVolume * 0.35, ctx.currentTime + 1.2);
+    gain.gain.linearRampToValueAtTime(this.ambientVolume * 0.45, ctx.currentTime + 0.8);
     gain.connect(ctx.destination);
     this.ambientGain = gain;
 
-    if (type === 'rain' || type === 'whitenoise' || type === 'zen') {
-      // Create continuous noise buffer
-      const bufferSize = ctx.sampleRate * 3;
+    if (type === 'lluvia' || type === 'ruidoblanco' || type === 'cafe') {
+      const bufferSize = ctx.sampleRate * 4;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
 
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
       let lastOut = 0.0;
+
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        if (type === 'whitenoise') {
-          // Brown noise integration
+
+        if (type === 'ruidoblanco') {
+          // Smooth, balanced white noise (not harsh)
+          data[i] = white * 0.6;
+        } else if (type === 'lluvia') {
+          // Pink noise algorithm for authentic rainfall + random raindrop splash impulses
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          const pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          b6 = white * 0.115926;
+          const droplet = Math.random() > 0.998 ? (Math.random() - 0.5) * 0.9 : 0;
+          data[i] = (pink * 0.18 + droplet) * 2.2;
+        } else if (type === 'cafe') {
+          // Warm brown noise murmur for coffee shop background rumble
           lastOut = (lastOut + 0.02 * white) / 1.02;
-          data[i] = lastOut * 3.5;
-        } else if (type === 'rain') {
-          // Pink/Rain noise with soft droplet fluctuations
-          lastOut = (lastOut + 0.04 * white) / 1.04;
-          data[i] = lastOut * 2.8 + (Math.random() > 0.996 ? (Math.random() - 0.5) * 0.6 : 0);
-        } else {
-          // Zen wind
-          lastOut = (lastOut + 0.015 * white) / 1.015;
-          data[i] = lastOut * 3.0;
+          data[i] = lastOut * 3.8;
         }
       }
 
@@ -230,24 +239,59 @@ class SoundManager {
       noiseNode.buffer = buffer;
       noiseNode.loop = true;
 
-      // Filter
       const filter = ctx.createBiquadFilter();
-      if (type === 'rain') {
+      if (type === 'lluvia') {
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(850, ctx.currentTime);
-      } else if (type === 'whitenoise') {
+        filter.frequency.setValueAtTime(800, ctx.currentTime);
+      } else if (type === 'ruidoblanco') {
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(450, ctx.currentTime);
-      } else {
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(320, ctx.currentTime);
-        filter.Q.setValueAtTime(1.5, ctx.currentTime);
+        filter.frequency.setValueAtTime(1400, ctx.currentTime);
+      } else if (type === 'cafe') {
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(400, ctx.currentTime);
       }
 
       noiseNode.connect(filter);
       filter.connect(gain);
       noiseNode.start(ctx.currentTime);
       this.ambientSource = noiseNode;
+
+      // For Café: generate soft coffee cup / saucer clinks at random cozy intervals
+      if (type === 'cafe') {
+        const playCupClink = () => {
+          if (this.currentAmbientType !== 'cafe' || !this.ctx || !this.ambientGain) return;
+          const now = this.ctx.currentTime;
+          const clinkOsc = this.ctx.createOscillator();
+          const clinkGain = this.ctx.createGain();
+          
+          // Frequencies characteristic of porcelain/ceramic cups
+          const clinkFreqs = [2400, 2800, 3200, 3600];
+          const chosenFreq = clinkFreqs[Math.floor(Math.random() * clinkFreqs.length)];
+          clinkOsc.type = 'sine';
+          clinkOsc.frequency.setValueAtTime(chosenFreq, now);
+
+          clinkGain.gain.setValueAtTime(0, now);
+          clinkGain.gain.linearRampToValueAtTime(this.ambientVolume * 0.08, now + 0.005);
+          clinkGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+          clinkOsc.connect(clinkGain);
+          clinkGain.connect(gain);
+
+          clinkOsc.start(now);
+          clinkOsc.stop(now + 0.18);
+        };
+
+        const scheduleNextClink = () => {
+          if (this.currentAmbientType !== 'cafe') return;
+          const delay = Math.random() * 4000 + 2500; // clink every 2.5 to 6.5s
+          this.cafeClinkInterval = setTimeout(() => {
+            playCupClink();
+            scheduleNextClink();
+          }, delay);
+        };
+
+        scheduleNextClink();
+      }
 
     } else if (type === 'binaural') {
       // 40Hz Gamma Focus frequency (200Hz in left ear, 240Hz in right ear)
@@ -256,10 +300,10 @@ class SoundManager {
       const merger = ctx.createChannelMerger(2);
 
       oscLeft.type = 'sine';
-      oscLeft.frequency.setValueAtTime(196, ctx.currentTime); // G3
+      oscLeft.frequency.setValueAtTime(200, ctx.currentTime);
 
       oscRight.type = 'sine';
-      oscRight.frequency.setValueAtTime(236, ctx.currentTime); // 40Hz beat differential
+      oscRight.frequency.setValueAtTime(240, ctx.currentTime);
 
       oscLeft.connect(merger, 0, 0);
       oscRight.connect(merger, 0, 1);
@@ -267,14 +311,18 @@ class SoundManager {
 
       oscLeft.start(ctx.currentTime);
       oscRight.start(ctx.currentTime);
-      this.ambientSource = oscLeft; // keep reference to stop
+      this.ambientSource = oscLeft;
     }
   }
 
   public stopAmbient() {
+    if (this.cafeClinkInterval) {
+      clearTimeout(this.cafeClinkInterval);
+      this.cafeClinkInterval = null;
+    }
     if (this.ambientGain && this.ctx) {
       try {
-        this.ambientGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.5);
+        this.ambientGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.4);
       } catch {}
     }
     setTimeout(() => {
@@ -286,7 +334,7 @@ class SoundManager {
         this.ambientSource = null;
       }
       this.ambientGain = null;
-    }, 550);
+    }, 450);
     this.currentAmbientType = 'none';
   }
 }

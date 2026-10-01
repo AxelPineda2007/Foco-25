@@ -4,6 +4,7 @@ import { soundManager, AmbientSoundType } from '../utils/audio';
 import { DISTRACTION_OPTIONS } from '../utils/storage';
 import { fireConfetti } from '../utils/confetti';
 import { FocusTree } from './FocusTree';
+import { AmbientSoundSelector } from './AmbientSoundSelector';
 import { AntiDistractionSosModal } from './AntiDistractionSosModal';
 import { 
   Play, 
@@ -57,8 +58,9 @@ export const Timer: React.FC<TimerProps> = ({
   // Anti-cellphone shield state
   const [phoneShieldActive, setPhoneShieldActive] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [selectedAmbient, setSelectedAmbient] = useState<AmbientSoundType>('none');
-  const [ambientVolume, setAmbientVolume] = useState<number>(0.35);
+  const [selectedAmbient, setSelectedAmbient] = useState<AmbientSoundType>('lluvia');
+  const [ambientVolume, setAmbientVolume] = useState<number>(0.4);
+  const [isAmbientPlaying, setIsAmbientPlaying] = useState<boolean>(false);
 
   // Tab switch warning
   const [tabSwitchWarning, setTabSwitchWarning] = useState<string | null>(null);
@@ -153,19 +155,22 @@ export const Timer: React.FC<TimerProps> = ({
     setTreeAbandoned(false);
     setTreeCompleted(false);
     soundManager.playStart();
-    if (selectedAmbient !== 'none') {
+    if (selectedAmbient !== 'none' && soundEnabled) {
       soundManager.startAmbient(selectedAmbient);
+      setIsAmbientPlaying(true);
     }
   };
 
   const handlePause = () => {
     setIsRunning(false);
     soundManager.stopAmbient();
+    setIsAmbientPlaying(false);
   };
 
   const handleReset = () => {
     setIsRunning(false);
     soundManager.stopAmbient();
+    setIsAmbientPlaying(false);
     setSessionStartTime(null);
     setTimeLeft(getTargetSeconds(mode, isTestMode));
     setTreeAbandoned(false);
@@ -175,6 +180,7 @@ export const Timer: React.FC<TimerProps> = ({
   const handleTimerComplete = () => {
     setIsRunning(false);
     soundManager.stopAmbient();
+    setIsAmbientPlaying(false);
 
     if (mode === 'work') {
       setTreeCompleted(true);
@@ -223,6 +229,7 @@ export const Timer: React.FC<TimerProps> = ({
   const handleTriggerAbandon = () => {
     setIsRunning(false);
     soundManager.stopAmbient();
+    setIsAmbientPlaying(false);
     soundManager.playAbandonAlert();
     setShowDistractionModal(true);
   };
@@ -258,8 +265,28 @@ export const Timer: React.FC<TimerProps> = ({
 
   const handleSelectAmbient = (ambient: AmbientSoundType) => {
     setSelectedAmbient(ambient);
-    if (isRunning && soundEnabled) {
-      soundManager.startAmbient(ambient);
+    if (ambient === 'none') {
+      soundManager.stopAmbient();
+      setIsAmbientPlaying(false);
+    } else {
+      if (soundEnabled) {
+        soundManager.startAmbient(ambient);
+        setIsAmbientPlaying(true);
+      }
+    }
+  };
+
+  const handleToggleAmbientPlay = () => {
+    if (isAmbientPlaying) {
+      soundManager.stopAmbient();
+      setIsAmbientPlaying(false);
+    } else {
+      const soundToPlay = selectedAmbient === 'none' ? 'lluvia' : selectedAmbient;
+      setSelectedAmbient(soundToPlay);
+      if (soundEnabled) {
+        soundManager.startAmbient(soundToPlay);
+        setIsAmbientPlaying(true);
+      }
     }
   };
 
@@ -542,56 +569,18 @@ export const Timer: React.FC<TimerProps> = ({
         </div>
       </div>
 
-      {/* Ambient Soundscape Synthesizer Deck */}
+      {/* Ambient Sound Selector (Lluvia, Ruido Blanco, Café) */}
       {!isZenFullscreen && (
-        <div className="mt-5 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 relative z-10">
-          <div className="flex items-center justify-between mb-2 text-xs">
-            <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
-              <Radio className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Paisajes Sonoros Nativos (Foco & TDAH)</span>
-            </div>
-            {selectedAmbient !== 'none' && (
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400">Volumen:</span>
-                <input
-                  type="range"
-                  min="0.05"
-                  max="1"
-                  step="0.05"
-                  value={ambientVolume}
-                  onChange={e => handleAmbientVolumeChange(Number(e.target.value))}
-                  className="w-16 accent-cyan-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-xs">
-            {[
-              { type: 'none', label: 'Silencio', icon: VolumeX },
-              { type: 'rain', label: 'Lluvia Zen', icon: CloudRain },
-              { type: 'whitenoise', label: 'Ruido Marrón', icon: Waves },
-              { type: 'binaural', label: '40Hz Gamma', icon: Radio },
-              { type: 'zen', label: 'Viento Suave', icon: Wind },
-            ].map(item => {
-              const Icon = item.icon;
-              const isCurrent = selectedAmbient === item.type;
-              return (
-                <button
-                  key={item.type}
-                  onClick={() => handleSelectAmbient(item.type as AmbientSoundType)}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-medium border transition-all ${
-                    isCurrent
-                      ? 'border-cyan-500 bg-cyan-950/50 text-cyan-200 font-bold shadow-sm'
-                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700'
-                  }`}
-                >
-                  <Icon className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="mt-5 relative z-10">
+          <AmbientSoundSelector
+            currentSound={selectedAmbient}
+            isPlaying={isAmbientPlaying}
+            volume={ambientVolume}
+            onSelectSound={handleSelectAmbient}
+            onTogglePlay={handleToggleAmbientPlay}
+            onVolumeChange={handleAmbientVolumeChange}
+            isSessionRunning={isRunning}
+          />
         </div>
       )}
 
