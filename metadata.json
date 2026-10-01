@@ -1,0 +1,6 @@
+{
+  "name": "FOCO 25 - Hábitos de Estudio",
+  "description": "Temporizador 25/5 contra la distracción del celular, registro de sesiones por materia, gráficos semanales y análisis de franja horaria óptima con IA.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
