@@ -74,18 +74,18 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
   isSessionRunning,
 }) => {
   return (
-    <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 relative overflow-hidden backdrop-blur-sm">
+    <div className="bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 relative overflow-hidden backdrop-blur-sm transition-colors duration-300">
       {/* Top Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+          <div className="p-1.5 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
             <Volume2 className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs font-bold text-white block">
+            <span className="text-xs font-bold text-slate-900 dark:text-white block">
               Sonidos de Ambiente (Sesión 25 min)
             </span>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               Lluvia, Ruido Blanco y Café para bloquear el mundo exterior
             </span>
           </div>
@@ -94,8 +94,8 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
         {/* Volume & Master Play Controls */}
         <div className="flex items-center gap-2.5">
           {currentSound !== 'none' && (
-            <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-xl border border-slate-800">
-              <span className="text-[10px] text-slate-400 font-mono-numbers">
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-300">
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono-numbers">
                 {Math.round(volume * 100)}%
               </span>
               <input
@@ -105,7 +105,7 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
                 step="0.05"
                 value={volume}
                 onChange={e => onVolumeChange(Number(e.target.value))}
-                className="w-16 accent-indigo-500 h-1 bg-slate-800 rounded-lg cursor-pointer"
+                className="w-16 accent-indigo-600 h-1 bg-slate-200 dark:bg-slate-800 rounded-lg cursor-pointer"
                 title="Volumen del sonido de ambiente"
               />
             </div>
@@ -116,8 +116,8 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
               onClick={onTogglePlay}
               className={`p-1.5 rounded-xl border transition-all flex items-center gap-1 text-xs font-semibold px-2.5 ${
                 isPlaying
-                  ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+                  ? 'bg-emerald-500/10 dark:bg-emerald-600/20 border-emerald-500/30 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-sm'
               }`}
               title={isPlaying ? 'Pausar sonido de fondo' : 'Reproducir sonido de fondo'}
             >
@@ -150,16 +150,16 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
               onClick={() => onSelectSound(opt.id)}
               className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all relative group overflow-hidden ${
                 isSelected
-                  ? 'bg-slate-900 border-indigo-500 ring-1 ring-indigo-500/50 shadow-md'
-                  : 'bg-slate-900/50 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/80'
+                  ? 'bg-white dark:bg-slate-900 border-indigo-500 ring-1 ring-indigo-500/50 shadow-md'
+                  : 'bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/80 shadow-sm'
               }`}
             >
               {/* Active Soundwave Animation bars when playing */}
               {isCurrentlyActive && (
                 <div className="absolute right-2.5 top-2.5 flex items-end gap-0.5 h-3">
-                  <span className="w-0.5 h-full bg-indigo-400 rounded-full animate-pulse" />
-                  <span className="w-0.5 h-2 bg-indigo-400 rounded-full animate-pulse delay-75" />
-                  <span className="w-0.5 h-3 bg-indigo-400 rounded-full animate-pulse delay-150" />
+                  <span className="w-0.5 h-full bg-indigo-500 dark:bg-indigo-400 rounded-full animate-pulse" />
+                  <span className="w-0.5 h-2 bg-indigo-500 dark:bg-indigo-400 rounded-full animate-pulse delay-75" />
+                  <span className="w-0.5 h-3 bg-indigo-500 dark:bg-indigo-400 rounded-full animate-pulse delay-150" />
                 </div>
               )}
 
@@ -173,12 +173,12 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
                 >
                   <Icon className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-white truncate">
+                <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                   {opt.name}
                 </span>
               </div>
 
-              <p className="text-[10px] text-slate-400 leading-tight line-clamp-2">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight line-clamp-2">
                 {opt.shortDesc}
               </p>
 
@@ -197,20 +197,20 @@ export const AmbientSoundSelector: React.FC<AmbientSoundSelectorProps> = ({
       </div>
 
       {/* Mute / None option */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-[11px] text-slate-400">
+      <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/60 text-[11px] text-slate-500 dark:text-slate-400">
         <button
           onClick={() => onSelectSound('none')}
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
             currentSound === 'none'
-              ? 'text-white font-semibold bg-slate-800'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'text-slate-900 dark:text-white font-semibold bg-slate-200/80 dark:bg-slate-800'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
           }`}
         >
           <VolumeX className="w-3.5 h-3.5" />
           <span>Silencio (Sin sonido de ambiente)</span>
         </button>
 
-        <span className="text-[10px] text-slate-500 hidden sm:inline">
+        <span className="text-[10px] text-slate-400 dark:text-slate-500 hidden sm:inline">
           {isSessionRunning ? '✓ Se reproduce durante tus 25 min de foco' : 'Activo al iniciar el temporizador'}
         </span>
       </div>

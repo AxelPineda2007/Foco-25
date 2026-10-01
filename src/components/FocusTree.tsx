@@ -61,46 +61,46 @@ export const FocusTree: React.FC<FocusTreeProps> = ({
   };
 
   return (
-    <div className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden backdrop-blur-sm">
+    <div className="bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden backdrop-blur-sm transition-colors duration-300">
       {/* Background radial highlight */}
       <div 
         className={`absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl pointer-events-none transition-all duration-700 ${
           isAbandoned 
             ? 'bg-rose-600/15' 
             : isCompleted || progressPercent >= 75 
-            ? 'bg-emerald-600/20' 
-            : 'bg-indigo-600/15'
+            ? 'bg-emerald-600/15 dark:bg-emerald-600/20' 
+            : 'bg-indigo-600/10 dark:bg-indigo-600/15'
         }`} 
       />
 
       {/* Header: Student Level & Forest Stats */}
       <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
             <TreePine className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs font-bold text-white block leading-tight">
+            <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">
               Bosque de Concentración
             </span>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               Nivel {level} • {getRankTitle(level)}
             </span>
           </div>
         </div>
 
         <div className="text-right">
-          <span className="text-xs font-bold font-mono-numbers text-emerald-400">
+          <span className="text-xs font-bold font-mono-numbers text-emerald-600 dark:text-emerald-400">
             {xp} XP
           </span>
-          <span className="text-[10px] text-slate-500 block">
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
             {currentLevelXp}/100 para Nivel {level + 1}
           </span>
         </div>
       </div>
 
       {/* Level XP Progress Bar */}
-      <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800 mb-4 relative z-10">
+      <div className="w-full bg-slate-200 dark:bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-300 dark:border-slate-800 mb-4 relative z-10 transition-colors duration-300">
         <div 
           className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
           style={{ width: `${currentLevelXp}%` }}
@@ -116,7 +116,7 @@ export const FocusTree: React.FC<FocusTreeProps> = ({
               cx="50"
               cy="50"
               r="42"
-              className="stroke-slate-800 fill-none"
+              className="stroke-slate-200 dark:stroke-slate-800 fill-none transition-colors duration-300"
               strokeWidth="5"
             />
             <circle
@@ -144,35 +144,35 @@ export const FocusTree: React.FC<FocusTreeProps> = ({
         </div>
 
         <div className="text-center mt-3">
-          <h4 className="text-xs font-bold text-white flex items-center justify-center gap-1.5">
+          <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
             <span>{stageLabel}</span>
-            {isCompleted && <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />}
+            {isCompleted && <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 animate-spin" />}
           </h4>
-          <p className="text-[11px] text-slate-400 max-w-xs mt-0.5 leading-snug">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs mt-0.5 leading-snug">
             {stageDescription}
           </p>
         </div>
       </div>
 
       {/* Forest Mini Gallery Tally */}
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] relative z-10">
+      <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] relative z-10 transition-colors duration-300">
         <div className="flex items-center gap-1.5">
           <span className="text-base select-none">🌲</span>
-          <span className="text-slate-300 font-semibold font-mono-numbers">
+          <span className="text-slate-700 dark:text-slate-300 font-semibold font-mono-numbers">
             {totalCompletedSessions}
           </span>
-          <span className="text-slate-500 text-[10px]">árboles vivos</span>
+          <span className="text-slate-400 dark:text-slate-500 text-[10px]">árboles vivos</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <span className="text-base select-none">🥀</span>
-          <span className="text-rose-400 font-semibold font-mono-numbers">
+          <span className="text-rose-600 dark:text-rose-400 font-semibold font-mono-numbers">
             {totalAbandonedSessions}
           </span>
-          <span className="text-slate-500 text-[10px]">marchitados</span>
+          <span className="text-slate-400 dark:text-slate-500 text-[10px]">marchitados</span>
         </div>
 
-        <span className="text-[10px] text-slate-500">
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">
           Regla: No tocar el celular
         </span>
       </div>

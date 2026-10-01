@@ -98,15 +98,15 @@ export const SessionsList: React.FC<SessionsListProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative backdrop-blur-md">
+    <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-md dark:shadow-xl relative backdrop-blur-md transition-colors duration-300">
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-white">Registro de Sesiones por Materia</h2>
+            <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Registro de Sesiones por Materia</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Historial con fecha, hora, materia y causa de abandono
           </p>
         </div>
@@ -123,7 +123,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-950 border border-slate-800 hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
             title="Exportar respaldo JSON"
           >
             <Download className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
           <button
             onClick={onResetSampleData}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-950 border border-slate-800 hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
             title="Restaurar datos de ejemplo de la semana"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -145,11 +145,11 @@ export const SessionsList: React.FC<SessionsListProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs">
         {/* Subject Filter */}
         <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Filtrar por Materia:</label>
+          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">Filtrar por Materia:</label>
           <select
             value={selectedSubjectId}
             onChange={e => setSelectedSubjectId(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors duration-300"
           >
             <option value="all">Todas las Materias ({sessions.length})</option>
             {subjects.map(sub => {
@@ -165,12 +165,12 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
         {/* Status Filter */}
         <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Filtrar por Estado:</label>
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">Filtrar por Estado:</label>
+          <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors duration-300">
             <button
               onClick={() => setStatusFilter('all')}
               className={`flex-1 py-1 text-center rounded-lg transition-colors ${
-                statusFilter === 'all' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
+                statusFilter === 'all' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Todas
@@ -178,7 +178,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
             <button
               onClick={() => setStatusFilter('completed')}
               className={`flex-1 py-1 text-center rounded-lg transition-colors ${
-                statusFilter === 'completed' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
+                statusFilter === 'completed' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Completadas
@@ -186,7 +186,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
             <button
               onClick={() => setStatusFilter('abandoned')}
               className={`flex-1 py-1 text-center rounded-lg transition-colors ${
-                statusFilter === 'abandoned' ? 'bg-rose-600 text-white font-semibold' : 'text-slate-400 hover:text-white'
+                statusFilter === 'abandoned' ? 'bg-rose-600 text-white font-semibold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Abandonadas
@@ -196,15 +196,15 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
         {/* Search */}
         <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Buscar en notas o distractor:</label>
+          <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">Buscar en notas o distractor:</label>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Buscar tema, palabra clave..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-8 pr-3 py-2 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs transition-colors duration-300"
             />
           </div>
         </div>
@@ -213,8 +213,8 @@ export const SessionsList: React.FC<SessionsListProps> = ({
       {/* Sessions Table / List */}
       <div className="overflow-x-auto">
         {filteredSessions.length === 0 ? (
-          <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
-            <p className="text-xs text-slate-400">No se encontraron sesiones con los filtros aplicados.</p>
+          <div className="text-center py-10 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+            <p className="text-xs text-slate-500 dark:text-slate-400">No se encontraron sesiones con los filtros aplicados.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -235,7 +235,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
               return (
                 <div
                   key={session.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition-colors gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors duration-300 gap-3"
                 >
                   {/* Left: Subject & Date */}
                   <div className="flex items-start gap-3 min-w-[200px]">
@@ -245,14 +245,14 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                     />
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-xs">{session.subjectName}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">{session.subjectName}</span>
                         {session.focusQuality && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 capitalize">
                             {session.focusQuality}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         <span className="capitalize">{dateStr}</span>
                         <span>•</span>
                         <span className="font-mono-numbers">{timeStr}</span>
@@ -263,12 +263,12 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                   {/* Middle: Notes & Distraction reason */}
                   <div className="flex-1 text-xs">
                     {session.notes && (
-                      <p className="text-slate-300 text-xs italic">
+                      <p className="text-slate-700 dark:text-slate-300 text-xs italic">
                         "{session.notes}"
                       </p>
                     )}
                     {session.distractionReason && (
-                      <div className="flex items-center gap-1.5 text-rose-400 text-[11px] mt-1">
+                      <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 text-[11px] mt-1 font-medium">
                         <Smartphone className="w-3.5 h-3.5 flex-shrink-0" />
                         <span>Distractor: {session.distractionReason}</span>
                       </div>
@@ -278,13 +278,13 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                   {/* Right: Duration, Status & Delete button */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
                     <div className="text-right">
-                      <div className="text-xs font-mono-numbers font-bold text-white">
+                      <div className="text-xs font-mono-numbers font-bold text-slate-900 dark:text-white">
                         {session.durationMinutes} min
-                        <span className="text-[10px] text-slate-500 font-normal"> / {session.targetMinutes}m</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal"> / {session.targetMinutes}m</span>
                       </div>
                       <span
                         className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
-                          isCompleted ? 'text-emerald-400' : 'text-rose-400'
+                          isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}
                       >
                         {isCompleted ? (
@@ -303,7 +303,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
                     <button
                       onClick={() => onDeleteSession(session.id)}
-                      className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-900 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-slate-900 transition-colors"
                       title="Eliminar registro"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -319,19 +319,19 @@ export const SessionsList: React.FC<SessionsListProps> = ({
       {/* Manual Session Modal */}
       {showManualModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-            <h3 className="text-base font-bold text-white mb-1">Registrar Sesión Manual</h3>
-            <p className="text-xs text-slate-400 mb-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative transition-colors duration-300">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">Registrar Sesión Manual</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
               Registra una sesión que estudiaste fuera de la app para incluirla en el análisis.
             </p>
 
             <form onSubmit={handleCreateManualSession} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 mb-1">Materia:</label>
+                <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Materia:</label>
                 <select
                   value={manualSubjectId}
                   onChange={e => setManualSubjectId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                 >
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -341,43 +341,43 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-300 mb-1">Fecha:</label>
+                  <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Fecha:</label>
                   <input
                     type="date"
                     value={manualDate}
                     onChange={e => setManualDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 mb-1">Hora de Inicio:</label>
+                  <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Hora de Inicio:</label>
                   <input
                     type="time"
                     value={manualTime}
                     onChange={e => setManualTime(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-300 mb-1">Duración (minutos):</label>
+                  <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Duración (minutos):</label>
                   <input
                     type="number"
                     min="1"
                     max="180"
                     value={manualDuration}
                     onChange={e => setManualDuration(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 mb-1">Resultado:</label>
+                  <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Resultado:</label>
                   <select
                     value={manualStatus}
                     onChange={e => setManualStatus(e.target.value as SessionStatus)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                   >
                     <option value="completed">Completada (25 min)</option>
                     <option value="abandoned">Abandonada antes de tiempo</option>
@@ -387,11 +387,11 @@ export const SessionsList: React.FC<SessionsListProps> = ({
 
               {manualStatus === 'abandoned' && (
                 <div>
-                  <label className="block text-rose-300 mb-1">Motivo de distracción:</label>
+                  <label className="block text-rose-600 dark:text-rose-300 mb-1 font-medium">Motivo de distracción:</label>
                   <select
                     value={manualDistraction}
                     onChange={e => setManualDistraction(e.target.value)}
-                    className="w-full bg-slate-950 border border-rose-900 rounded-xl px-3 py-2 text-rose-200"
+                    className="w-full bg-rose-50 dark:bg-slate-950 border border-rose-200 dark:border-rose-900 rounded-xl px-3 py-2 text-rose-800 dark:text-rose-200"
                   >
                     {DISTRACTION_OPTIONS.map(d => (
                       <option key={d} value={d}>{d}</option>
@@ -401,13 +401,13 @@ export const SessionsList: React.FC<SessionsListProps> = ({
               )}
 
               <div>
-                <label className="block text-slate-300 mb-1">Notas / Tema estudiado:</label>
+                <label className="block text-slate-700 dark:text-slate-300 mb-1 font-medium">Notas / Tema estudiado:</label>
                 <input
                   type="text"
                   placeholder="Ej: Repasé ejercicios para el parcial..."
                   value={manualNotes}
                   onChange={e => setManualNotes(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white placeholder-slate-400"
                 />
               </div>
 
@@ -415,13 +415,13 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowManualModal(false)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30"
+                  className="px-4 py-2 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-colors"
                 >
                   Guardar Sesión
                 </button>

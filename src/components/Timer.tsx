@@ -315,28 +315,28 @@ export const Timer: React.FC<TimerProps> = ({
 
   return (
     <div
-      className={`bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden backdrop-blur-md transition-all duration-300 ${
-        isZenFullscreen ? 'fixed inset-0 z-50 rounded-none p-8 flex flex-col justify-center max-w-none' : ''
+      className={`bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-lg dark:shadow-2xl relative overflow-hidden backdrop-blur-md transition-all duration-300 ${
+        isZenFullscreen ? 'fixed inset-0 z-50 rounded-none p-8 flex flex-col justify-center max-w-none bg-slate-50 dark:bg-[#090d16]' : ''
       }`}
     >
       {/* Background ambient light */}
       <div
         className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 ${
-          mode === 'work' ? 'bg-indigo-600/20' : 'bg-emerald-600/20'
+          mode === 'work' ? 'bg-indigo-600/10 dark:bg-indigo-600/20' : 'bg-emerald-600/10 dark:bg-emerald-600/20'
         }`}
       />
       <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 bg-cyan-600/10" />
 
       {/* Tab Switch Escape Alert Banner */}
       {tabSwitchWarning && (
-        <div className="mb-4 p-3 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-center justify-between animate-in slide-in-from-top-2 duration-300 relative z-20">
+        <div className="mb-4 p-3 rounded-2xl bg-amber-500/15 dark:bg-amber-500/20 border border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between animate-in slide-in-from-top-2 duration-300 relative z-20">
           <div className="flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-amber-400 flex-shrink-0 animate-bounce" />
+            <Smartphone className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 animate-bounce" />
             <span>{tabSwitchWarning}</span>
           </div>
           <button
             onClick={() => setTabSwitchWarning(null)}
-            className="text-amber-400 hover:text-white ml-2 text-xs font-bold"
+            className="text-amber-700 dark:text-amber-400 hover:text-slate-900 dark:hover:text-white ml-2 text-xs font-bold"
           >
             ✕
           </button>
@@ -346,7 +346,7 @@ export const Timer: React.FC<TimerProps> = ({
       {/* Top Controls: Mode Switcher, Quick 10s Demo, Zen Fullscreen & Sound */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6 relative z-10">
         {/* Mode Selector */}
-        <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-slate-800 text-xs font-medium">
+        <div className="flex bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-medium transition-colors duration-300">
           <button
             onClick={() => {
               if (isRunning) return;
@@ -355,7 +355,7 @@ export const Timer: React.FC<TimerProps> = ({
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all ${
               mode === 'work'
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30 font-bold'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Brain className="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ export const Timer: React.FC<TimerProps> = ({
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all ${
               mode === 'break'
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 font-bold'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Coffee className="w-3.5 h-3.5" />
@@ -388,30 +388,30 @@ export const Timer: React.FC<TimerProps> = ({
             title={isTestMode ? 'Modo rápido 10s activo' : 'Activar prueba rápida de 10s'}
             className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-xl border transition-colors ${
               isTestMode
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold'
+                : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-sm'
             }`}
           >
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             <span>{isTestMode ? '10s Demo' : 'Modo Demo'}</span>
           </button>
 
           {/* Fullscreen Zen Mode Button */}
           <button
             onClick={() => setIsZenFullscreen(!isZenFullscreen)}
-            className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shadow-sm"
             title={isZenFullscreen ? 'Salir de pantalla completa' : 'Modo Zen Pantalla Completa'}
           >
-            {isZenFullscreen ? <Minimize2 className="w-4 h-4 text-indigo-400" /> : <Maximize2 className="w-4 h-4" />}
+            {isZenFullscreen ? <Minimize2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors shadow-sm"
             title={soundEnabled ? 'Silenciar sonidos' : 'Activar sonidos'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-indigo-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> : <VolumeX className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
           </button>
         </div>
       </div>
@@ -419,9 +419,9 @@ export const Timer: React.FC<TimerProps> = ({
       {/* Subject Picker Row */}
       {!isZenFullscreen && (
         <div className="mb-5 relative z-10">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
             <span>Materia de estudio:</span>
-            <span className="text-[11px] text-indigo-400 font-semibold">
+            <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
               {activeSubject.name} seleccionada
             </span>
           </div>
@@ -434,8 +434,8 @@ export const Timer: React.FC<TimerProps> = ({
                   onClick={() => onSelectSubject(sub)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                     isSelected
-                      ? 'border-indigo-500 bg-indigo-950/70 text-white shadow-md'
-                      : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/70 text-indigo-900 dark:text-white shadow-sm'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
                   <span
@@ -453,8 +453,8 @@ export const Timer: React.FC<TimerProps> = ({
       {/* Main Focus Stage: Circular SVG Gauge with Breathing Glow */}
       <div className="flex flex-col items-center justify-center my-4 relative z-10">
         {/* Anti-cellphone badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 mb-4 shadow-sm">
-          <Smartphone className={`w-3.5 h-3.5 ${phoneShieldActive ? 'text-emerald-400' : 'text-slate-500'}`} />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 mb-4 shadow-sm transition-colors duration-300">
+          <Smartphone className={`w-3.5 h-3.5 ${phoneShieldActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`} />
           <span>{phoneShieldActive ? '🛡️ Celular Lejos / Pantalla Abajo' : 'Celular cerca'}</span>
         </div>
 
@@ -476,7 +476,7 @@ export const Timer: React.FC<TimerProps> = ({
               cx="140"
               cy="140"
               r={circleRadius}
-              className="stroke-slate-950 fill-none"
+              className="stroke-slate-100 dark:stroke-slate-950 fill-none transition-colors duration-300"
               strokeWidth="12"
             />
             {/* Animated Progress Arc */}
@@ -496,17 +496,17 @@ export const Timer: React.FC<TimerProps> = ({
 
           {/* Time & Active State in Center */}
           <div className="absolute flex flex-col items-center justify-center text-center">
-            <div className="text-6xl sm:text-7xl font-black font-mono-numbers tracking-tight text-white drop-shadow-lg select-none">
+            <div className="text-6xl sm:text-7xl font-black font-mono-numbers tracking-tight text-slate-900 dark:text-white drop-shadow-sm select-none transition-colors duration-300">
               {formattedTime}
             </div>
-            <div className="text-xs font-semibold text-slate-400 mt-1 flex items-center gap-1.5">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
               <span
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: activeSubject.color }}
               />
-              <span className="text-white">{activeSubject.name}</span>
+              <span className="text-slate-900 dark:text-white font-medium">{activeSubject.name}</span>
             </div>
-            <span className="text-[10px] text-slate-500 mt-0.5 font-mono-numbers">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 font-mono-numbers">
               {Math.round(progressPercent)}% transcurrido
             </span>
           </div>
@@ -517,7 +517,7 @@ export const Timer: React.FC<TimerProps> = ({
           {!isRunning ? (
             <button
               onClick={handleStart}
-              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-600/30 text-base"
+              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-600/25 text-base"
             >
               <Play className="w-5 h-5 fill-current" />
               <span>{sessionStartTime ? 'Reanudar Foco' : 'Iniciar 25 Minutos'}</span>
@@ -525,7 +525,7 @@ export const Timer: React.FC<TimerProps> = ({
           ) : (
             <button
               onClick={handlePause}
-              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all border border-slate-700 text-base shadow-lg"
+              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-slate-900 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 transition-all border border-slate-200 dark:border-slate-700 text-base shadow-md"
             >
               <Pause className="w-5 h-5" />
               <span>Pausar</span>
@@ -534,7 +534,7 @@ export const Timer: React.FC<TimerProps> = ({
 
           <button
             onClick={handleReset}
-            className="p-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            className="p-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             title="Reiniciar temporizador"
           >
             <RotateCcw className="w-5 h-5" />
@@ -547,10 +547,10 @@ export const Timer: React.FC<TimerProps> = ({
                 setIsRunning(false);
                 setShowSosModal(true);
               }}
-              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-bold text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/60 transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-950/40 hover:bg-amber-500/20 dark:hover:bg-amber-900/60 border border-amber-500/30 dark:border-amber-800/60 transition-all shadow-sm"
               title="Pausa guiada si tienes ganas de mirar el celular"
             >
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>S.O.S. Celular</span>
             </button>
           )}
@@ -559,10 +559,10 @@ export const Timer: React.FC<TimerProps> = ({
           {mode === 'work' && isRunning && (
             <button
               onClick={handleTriggerAbandon}
-              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 transition-all"
+              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-500/10 dark:bg-rose-950/40 hover:bg-rose-500/20 dark:hover:bg-rose-900/60 border border-rose-500/30 dark:border-rose-800/60 transition-all"
               title="Registrar abandono por celular"
             >
-              <Smartphone className="w-4 h-4 text-rose-400" />
+              <Smartphone className="w-4 h-4 text-rose-500 dark:text-rose-400" />
               <span>Abandonar</span>
             </button>
           )}
@@ -615,19 +615,19 @@ export const Timer: React.FC<TimerProps> = ({
       {/* MODAL 2: Distracción / Abandono */}
       {showDistractionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-            <div className="flex items-center gap-3 text-rose-400 mb-3">
-              <div className="p-2.5 rounded-xl bg-rose-950/60 border border-rose-800/50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative transition-colors duration-300">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400 mb-3">
+              <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/50">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Registro de Abandono</h3>
-                <p className="text-xs text-rose-300">Identificar el distractor es el paso #1 para vencerlo</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Registro de Abandono</h3>
+                <p className="text-xs text-rose-600 dark:text-rose-300">Identificar el distractor es el paso #1 para vencerlo</p>
               </div>
             </div>
 
             <div className="my-4">
-              <label className="block text-xs font-medium text-slate-300 mb-2">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
                 ¿Qué te interrumpió? (Dato clave para la IA):
               </label>
               <div className="space-y-2">
@@ -637,8 +637,8 @@ export const Timer: React.FC<TimerProps> = ({
                     onClick={() => setSelectedDistraction(opt)}
                     className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer text-xs transition-all ${
                       selectedDistraction === opt
-                        ? 'border-rose-500 bg-rose-950/30 text-rose-200 font-medium'
-                        : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
+                        ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200 font-medium'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
                     <input
@@ -655,7 +655,7 @@ export const Timer: React.FC<TimerProps> = ({
             </div>
 
             <div className="mb-5">
-              <label className="block text-xs font-medium text-slate-400 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 Nota o detalle adicional (opcional):
               </label>
               <input
@@ -663,7 +663,7 @@ export const Timer: React.FC<TimerProps> = ({
                 placeholder="Ej: Vi una notificación de WhatsApp y me colgué 10 min..."
                 value={distractionNotes}
                 onChange={e => setDistractionNotes(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-rose-500"
               />
             </div>
 
@@ -673,7 +673,7 @@ export const Timer: React.FC<TimerProps> = ({
                   setShowDistractionModal(false);
                   setIsRunning(true);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
               >
                 Fue falsa alarma (Continuar)
               </button>
@@ -691,19 +691,19 @@ export const Timer: React.FC<TimerProps> = ({
       {/* MODAL 3: Completitud Exitosa (25 min cumplidos) */}
       {showCompletionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-            <div className="flex items-center gap-3 text-emerald-400 mb-3">
-              <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-800/50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative transition-colors duration-300">
+            <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 mb-3">
+              <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">¡25 Minutos de Enfoque Puro!</h3>
-                <p className="text-xs text-emerald-300">¡Tu árbol de concentración ha florecido y sumas +25 XP!</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">¡25 Minutos de Enfoque Puro!</h3>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">¡Tu árbol de concentración ha florecido y sumas +25 XP!</p>
               </div>
             </div>
 
             <div className="my-4">
-              <label className="block text-xs font-medium text-slate-300 mb-2">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
                 ¿Cómo sentiste la calidad de tu enfoque?
               </label>
               <div className="grid grid-cols-3 gap-2 text-xs">
@@ -713,8 +713,8 @@ export const Timer: React.FC<TimerProps> = ({
                     onClick={() => setFocusRating(quality)}
                     className={`py-2 px-3 rounded-xl border font-medium capitalize transition-all ${
                       focusRating === quality
-                        ? 'border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold'
-                        : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-200 font-bold'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
                     {quality === 'excelente' ? '⚡ Excelente' : quality === 'bueno' ? '👍 Bueno' : '😐 Regular'}
@@ -724,7 +724,7 @@ export const Timer: React.FC<TimerProps> = ({
             </div>
 
             <div className="mb-5">
-              <label className="block text-xs font-medium text-slate-400 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 ¿Qué tema lograste avanzar en {activeSubject.name}?
               </label>
               <input
@@ -732,7 +732,7 @@ export const Timer: React.FC<TimerProps> = ({
                 placeholder="Ej: Resolví 5 problemas de álgebra lineal..."
                 value={completionNotes}
                 onChange={e => setCompletionNotes(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
               />
             </div>
 

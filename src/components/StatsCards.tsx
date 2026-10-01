@@ -69,16 +69,16 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ sessions }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       {/* 1. Tasa de Éxito */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm relative overflow-hidden group hover:border-indigo-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Tasa de Éxito</span>
-          <TrendingUp className="w-3.5 h-3.5 text-indigo-400" />
+          <TrendingUp className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
         </div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold font-mono-numbers text-white">{successRate}%</span>
-          <span className="text-[11px] text-slate-400">retención</span>
+          <span className="text-2xl font-bold font-mono-numbers text-slate-900 dark:text-white">{successRate}%</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">retención</span>
         </div>
-        <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
           <div 
             className="bg-indigo-500 h-full rounded-full transition-all duration-500"
             style={{ width: `${successRate}%` }}
@@ -87,71 +87,71 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ sessions }) => {
       </div>
 
       {/* 2. Completadas (P0 / M2) */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm hover:border-emerald-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm hover:border-emerald-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Completadas</span>
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
         </div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold font-mono-numbers text-emerald-400">{completed.length}</span>
-          <span className="text-[11px] text-slate-400">de {total} sesiones</span>
+          <span className="text-2xl font-bold font-mono-numbers text-emerald-600 dark:text-emerald-400">{completed.length}</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">de {total}</span>
         </div>
-        <p className="text-[10px] text-emerald-500/80 mt-1">25 min sin interrupción</p>
+        <p className="text-[10px] text-emerald-600 dark:text-emerald-500/80 mt-1 font-medium">25 min sin interrupción</p>
       </div>
 
       {/* 3. Abandonadas (P0 / M2) */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm hover:border-rose-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm hover:border-rose-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Abandonadas</span>
-          <XCircle className="w-3.5 h-3.5 text-rose-400" />
+          <XCircle className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
         </div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold font-mono-numbers text-rose-400">{abandoned.length}</span>
-          <span className="text-[11px] text-slate-400">interrumpidas</span>
+          <span className="text-2xl font-bold font-mono-numbers text-rose-600 dark:text-rose-400">{abandoned.length}</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">interrumpidas</span>
         </div>
-        <p className="text-[10px] text-rose-400/80 mt-1">
+        <p className="text-[10px] text-rose-600 dark:text-rose-400/80 mt-1 font-medium">
           {cellphoneAbandonments > 0 ? `${cellphoneAbandonments} por celular` : 'Corte anticipado'}
         </p>
       </div>
 
       {/* 4. Tiempo Total Enfoque */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm hover:border-cyan-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm hover:border-cyan-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Foco Acumulado</span>
-          <Clock className="w-3.5 h-3.5 text-cyan-400" />
+          <Clock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold font-mono-numbers text-white">{hours}h {remainingMins}m</span>
+          <span className="text-2xl font-bold font-mono-numbers text-slate-900 dark:text-white">{hours}h {remainingMins}m</span>
         </div>
-        <p className="text-[10px] text-slate-400 mt-1">Tiempo neto estudiado</p>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Tiempo neto estudiado</p>
       </div>
 
       {/* 5. Foco vs Celular */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm hover:border-amber-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm hover:border-amber-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Riesgo Celular</span>
-          <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+          <Smartphone className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
         </div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold font-mono-numbers text-amber-400">{cellphoneAbandonments}</span>
-          <span className="text-[11px] text-slate-400">tentaciones</span>
+          <span className="text-2xl font-bold font-mono-numbers text-amber-600 dark:text-amber-400">{cellphoneAbandonments}</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">tentaciones</span>
         </div>
-        <p className="text-[10px] text-amber-400/80 mt-1 truncate" title={topDistraction}>
+        <p className="text-[10px] text-amber-600 dark:text-amber-400/80 mt-1 truncate font-medium" title={topDistraction}>
           {topDistractionCount > 0 ? topDistraction.split('/')[0].trim() : 'Bajo control'}
         </p>
       </div>
 
       {/* 6. Racha de Días */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 backdrop-blur-sm hover:border-orange-500/40 transition-colors">
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm hover:border-orange-500/50 transition-colors duration-300">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Racha de Días</span>
-          <Flame className="w-3.5 h-3.5 text-orange-400" />
+          <Flame className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
         </div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold font-mono-numbers text-orange-400">{streak}</span>
-          <span className="text-[11px] text-slate-400">días seguidos</span>
+          <span className="text-2xl font-bold font-mono-numbers text-orange-600 dark:text-orange-400">{streak}</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">días seguidos</span>
         </div>
-        <p className="text-[10px] text-orange-400/80 mt-1">Constancia de estudio</p>
+        <p className="text-[10px] text-orange-600 dark:text-orange-400/80 mt-1 font-medium">Constancia de estudio</p>
       </div>
     </div>
   );
