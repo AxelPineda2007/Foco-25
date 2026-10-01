@@ -229,6 +229,46 @@ export default function App() {
         {/* Dato clave que maneja: Sesiones completadas vs abandonadas (M2) */}
         <StatsCards sessions={sessions} />
 
+        {/* Daily Focus Goal Bar */}
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold text-sm">
+              🎯
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white text-sm">Meta de Enfoque Diario: 4 Sesiones (100 min)</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  {sessions.filter(s => s.status === 'completed' && s.startTime.split('T')[0] === new Date().toISOString().split('T')[0]).length} / 4 Hoy
+                </span>
+              </div>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Cumplir 4 bloques diarios de 25 minutos sin celular equivale a duplicar tu retención académica semanal.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {[1, 2, 3, 4].map(idx => {
+              const todayCompleted = sessions.filter(s => s.status === 'completed' && s.startTime.split('T')[0] === new Date().toISOString().split('T')[0]).length;
+              const isFilled = idx <= todayCompleted;
+              return (
+                <div
+                  key={idx}
+                  className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs border transition-all ${
+                    isFilled
+                      ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm shadow-emerald-500/30'
+                      : 'bg-slate-950 text-slate-600 border-slate-800'
+                  }`}
+                  title={isFilled ? `Bloque ${idx} completado` : `Bloque ${idx} pendiente`}
+                >
+                  {isFilled ? '✓' : idx}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Primary Row: Timer (P0) & AI Pattern Analysis (M5) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Timer */}
@@ -238,6 +278,8 @@ export default function App() {
               activeSubject={activeSubject}
               onSelectSubject={setActiveSubject}
               onSaveSession={handleSaveSession}
+              totalCompletedSessions={sessions.filter(s => s.status === 'completed').length}
+              totalAbandonedSessions={sessions.filter(s => s.status === 'abandoned').length}
             />
           </div>
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Subject, StudySession, DistractionCategory } from '../types';
-import { soundManager } from '../utils/audio';
+import { soundManager, AmbientSoundType } from '../utils/audio';
 import { DISTRACTION_OPTIONS } from '../utils/storage';
+import { fireConfetti } from '../utils/confetti';
+import { FocusTree } from './FocusTree';
+import { AntiDistractionSosModal } from './AntiDistractionSosModal';
 import { 
   Play, 
   Pause, 
@@ -15,7 +18,14 @@ import {
   VolumeX,
   Zap,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Maximize2,
+  Minimize2,
+  Radio,
+  Sliders,
+  CloudRain,
+  Waves,
+  Wind
 } from 'lucide-react';
 
 interface TimerProps {
@@ -23,6 +33,8 @@ interface TimerProps {
   activeSubject: Subject;
   onSelectSubject: (sub: Subject) => void;
   onSaveSession: (session: StudySession) => void;
+  totalCompletedSessions: number;
+  totalAbandonedSessions: number;
 }
 
 type TimerMode = 'work' | 'break';
@@ -32,18 +44,31 @@ export const Timer: React.FC<TimerProps> = ({
   activeSubject,
   onSelectSubject,
   onSaveSession,
+  totalCompletedSessions,
+  totalAbandonedSessions,
 }) => {
   const [mode, setMode] = useState<TimerMode>('work');
   const [isTestMode, setIsTestMode] = useState(false); // 10s test mode for quick demos
   const [timeLeft, setTimeLeft] = useState<number>(25 * 60);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [isZenFullscreen, setIsZenFullscreen] = useState<boolean>(false);
   
   // Anti-cellphone shield state
   const [phoneShieldActive, setPhoneShieldActive] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [selectedAmbient, setSelectedAmbient] = useState<AmbientSoundType>('none');
+  const [ambientVolume, setAmbientVolume] = useState<number>(0.35);
+
+  // Tab switch warning
+  const [tabSwitchWarning, setTabSwitchWarning] = useState<string | null>(null);
+
+  // Tree state
+  const [treeAbandoned, setTreeAbandoned] = useState<boolean>(false);
+  const [treeCompleted, setTreeCompleted] = useState<boolean>(false);
 
   // Modals
+  const [showSosModal, setShowSosModal] = useState<boolean>(false);
   const [showDistractionModal, setShowDistractionModal] = useState<boolean>(false);
   const [selectedDistraction, setSelectedDistraction] = useState<DistractionCategory>(
     'Celular / Redes Sociales (Instagram, TikTok)'
@@ -55,6 +80,7 @@ export const Timer: React.FC<TimerProps> = ({
   const [focusRating, setFocusRating] = useState<'excelente' | 'bueno' | 'regular'>('excelente');
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const tabAwayTimeRef = useRef<number | null>(null);
 
   const getTargetSeconds = (currentMode: TimerMode, testMode: boolean) => {
     if (testMode) {
@@ -67,6 +93,8 @@ export const Timer: React.FC<TimerProps> = ({
   useEffect(() => {
     if (!isRunning) {
       setTimeLeft(getTargetSeconds(mode, isTestMode));
+      setTreeAbandoned(false);
+      setTreeCompleted(false);
     }
   }, [mode, isTestMode]);
 
@@ -91,33 +119,70 @@ export const Timer: React.FC<TimerProps> = ({
     };
   }, [isRunning, mode, isTestMode]);
 
+  // Active anti-tab switch detection (catches if student leaves to browse Instagram/YouTube/WhatsApp Web)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!isRunning || mode !== 'work') return;
+
+      if (document.hidden) {
+        tabAwayTimeRef.current = Date.now();
+      } else {
+        if (tabAwayTimeRef.current) {
+          const secondsAway = Math.round((Date.now() - tabAwayTimeRef.current) / 1000);
+          tabAwayTimeRef.current = null;
+          if (secondsAway >= 3) {
+            soundManager.playTabAlert();
+            setTabSwitchWarning(
+              `🚨 ¡Alerta de Fuga! Saliste de FOCO 25 durante ${secondsAway}s. ¿Fuiste a ver el celular o redes? Mantente en la zona.`
+            );
+            setTimeout(() => setTabSwitchWarning(null), 7000);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isRunning, mode]);
+
   const handleStart = () => {
     if (!sessionStartTime) {
       setSessionStartTime(new Date());
     }
     setIsRunning(true);
+    setTreeAbandoned(false);
+    setTreeCompleted(false);
     soundManager.playStart();
+    if (selectedAmbient !== 'none') {
+      soundManager.startAmbient(selectedAmbient);
+    }
   };
 
   const handlePause = () => {
     setIsRunning(false);
+    soundManager.stopAmbient();
   };
 
   const handleReset = () => {
     setIsRunning(false);
+    soundManager.stopAmbient();
     setSessionStartTime(null);
     setTimeLeft(getTargetSeconds(mode, isTestMode));
+    setTreeAbandoned(false);
+    setTreeCompleted(false);
   };
 
   const handleTimerComplete = () => {
     setIsRunning(false);
+    soundManager.stopAmbient();
 
     if (mode === 'work') {
+      setTreeCompleted(true);
       soundManager.playCompleted();
+      fireConfetti();
       setShowCompletionModal(true);
     } else {
       soundManager.playBreakFinished();
-      // Switch back to work mode
       setMode('work');
       setTimeLeft(getTargetSeconds('work', isTestMode));
       setSessionStartTime(null);
@@ -157,6 +222,7 @@ export const Timer: React.FC<TimerProps> = ({
   // Trigger abandonment
   const handleTriggerAbandon = () => {
     setIsRunning(false);
+    soundManager.stopAmbient();
     soundManager.playAbandonAlert();
     setShowDistractionModal(true);
   };
@@ -166,6 +232,8 @@ export const Timer: React.FC<TimerProps> = ({
     const start = sessionStartTime || new Date(Date.now() - (getTargetSeconds(mode, isTestMode) - timeLeft) * 1000);
     const end = new Date();
     const durationMinutes = Math.max(1, Math.round((end.getTime() - start.getTime()) / (60 * 1000)));
+
+    setTreeAbandoned(true);
 
     const newSession: StudySession = {
       id: `session-${Date.now()}`,
@@ -188,6 +256,18 @@ export const Timer: React.FC<TimerProps> = ({
     handleReset();
   };
 
+  const handleSelectAmbient = (ambient: AmbientSoundType) => {
+    setSelectedAmbient(ambient);
+    if (isRunning && soundEnabled) {
+      soundManager.startAmbient(ambient);
+    }
+  };
+
+  const handleAmbientVolumeChange = (vol: number) => {
+    setAmbientVolume(vol);
+    soundManager.setAmbientVolume(vol);
+  };
+
   const toggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
@@ -201,30 +281,53 @@ export const Timer: React.FC<TimerProps> = ({
   const totalTarget = getTargetSeconds(mode, isTestMode);
   const progressPercent = Math.min(100, Math.max(0, ((totalTarget - timeLeft) / totalTarget) * 100));
 
-  return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden backdrop-blur-md">
-      {/* Background ambient glow based on mode */}
-      <div 
-        className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-700 ${
-          mode === 'work' ? 'bg-indigo-600/15' : 'bg-emerald-600/15'
-        }`} 
-      />
-      <div 
-        className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-700 bg-cyan-600/10"
-      />
+  // Circular gauge math (radius 120, circumference ~ 753.98)
+  const circleRadius = 120;
+  const circumference = 2 * Math.PI * circleRadius;
+  const strokeDashoffset = circumference - (circumference * progressPercent) / 100;
 
-      {/* Top Header: Mode Toggles & Subject Picker */}
+  return (
+    <div
+      className={`bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden backdrop-blur-md transition-all duration-300 ${
+        isZenFullscreen ? 'fixed inset-0 z-50 rounded-none p-8 flex flex-col justify-center max-w-none' : ''
+      }`}
+    >
+      {/* Background ambient light */}
+      <div
+        className={`absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 ${
+          mode === 'work' ? 'bg-indigo-600/20' : 'bg-emerald-600/20'
+        }`}
+      />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 bg-cyan-600/10" />
+
+      {/* Tab Switch Escape Alert Banner */}
+      {tabSwitchWarning && (
+        <div className="mb-4 p-3 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-center justify-between animate-in slide-in-from-top-2 duration-300 relative z-20">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-amber-400 flex-shrink-0 animate-bounce" />
+            <span>{tabSwitchWarning}</span>
+          </div>
+          <button
+            onClick={() => setTabSwitchWarning(null)}
+            className="text-amber-400 hover:text-white ml-2 text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Top Controls: Mode Switcher, Quick 10s Demo, Zen Fullscreen & Sound */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6 relative z-10">
         {/* Mode Selector */}
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-medium">
+        <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-slate-800 text-xs font-medium">
           <button
             onClick={() => {
               if (isRunning) return;
               setMode('work');
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all ${
               mode === 'work'
-                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30 font-bold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -236,9 +339,9 @@ export const Timer: React.FC<TimerProps> = ({
               if (isRunning) return;
               setMode('break');
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition-all ${
               mode === 'break'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/30'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 font-bold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -247,27 +350,38 @@ export const Timer: React.FC<TimerProps> = ({
           </button>
         </div>
 
-        {/* Quick Demo Mode & Sound Controls */}
+        {/* Right utility buttons */}
         <div className="flex items-center gap-2">
+          {/* Demo Button */}
           <button
             onClick={() => {
               if (isRunning) return;
               setIsTestMode(!isTestMode);
             }}
-            title={isTestMode ? "Modo rápido 10s activo" : "Activar modo prueba rápido (10s)"}
-            className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg border transition-colors ${
-              isTestMode 
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
-                : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:text-slate-200'
+            title={isTestMode ? 'Modo rápido 10s activo' : 'Activar prueba rápida de 10s'}
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-xl border transition-colors ${
+              isTestMode
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
+                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
             }`}
           >
-            <Zap className="w-3 h-3" />
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
             <span>{isTestMode ? '10s Demo' : 'Modo Demo'}</span>
           </button>
 
+          {/* Fullscreen Zen Mode Button */}
+          <button
+            onClick={() => setIsZenFullscreen(!isZenFullscreen)}
+            className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            title={isZenFullscreen ? 'Salir de pantalla completa' : 'Modo Zen Pantalla Completa'}
+          >
+            {isZenFullscreen ? <Minimize2 className="w-4 h-4 text-indigo-400" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="p-1.5 rounded-lg bg-slate-800/60 border border-slate-700 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition-colors"
             title={soundEnabled ? 'Silenciar sonidos' : 'Activar sonidos'}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4 text-indigo-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
@@ -276,131 +390,240 @@ export const Timer: React.FC<TimerProps> = ({
       </div>
 
       {/* Subject Picker Row */}
-      <div className="mb-6 relative z-10">
-        <label className="block text-xs font-medium text-slate-400 mb-2">
-          Materia a estudiar:
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {subjects.map(sub => {
-            const isSelected = sub.id === activeSubject.id;
-            return (
-              <button
-                key={sub.id}
-                onClick={() => onSelectSubject(sub)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                  isSelected
-                    ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-sm'
-                    : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                }`}
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: sub.color }}
-                />
-                <span>{sub.name}</span>
-              </button>
-            );
-          })}
+      {!isZenFullscreen && (
+        <div className="mb-5 relative z-10">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span>Materia de estudio:</span>
+            <span className="text-[11px] text-indigo-400 font-semibold">
+              {activeSubject.name} seleccionada
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {subjects.map(sub => {
+              const isSelected = sub.id === activeSubject.id;
+              return (
+                <button
+                  key={sub.id}
+                  onClick={() => onSelectSubject(sub)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                    isSelected
+                      ? 'border-indigo-500 bg-indigo-950/70 text-white shadow-md'
+                      : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  }`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: sub.color }}
+                  />
+                  <span>{sub.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Timer Display */}
-      <div className="flex flex-col items-center justify-center my-6 relative z-10">
-        {/* Anti-distraction badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-950/80 border border-slate-800 text-slate-300 mb-4">
+      {/* Main Focus Stage: Circular SVG Gauge with Breathing Glow */}
+      <div className="flex flex-col items-center justify-center my-4 relative z-10">
+        {/* Anti-cellphone badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-300 mb-4 shadow-sm">
           <Smartphone className={`w-3.5 h-3.5 ${phoneShieldActive ? 'text-emerald-400' : 'text-slate-500'}`} />
-          <span>{phoneShieldActive ? '🛡️ Escudo Anti-Celular Activo' : 'Celular cerca'}</span>
+          <span>{phoneShieldActive ? '🛡️ Celular Lejos / Pantalla Abajo' : 'Celular cerca'}</span>
         </div>
 
-        {/* Digital Clock */}
-        <div className="relative flex items-center justify-center">
-          <div className="text-7xl md:text-8xl font-black font-mono-numbers tracking-tight text-white drop-shadow-md select-none">
-            {formattedTime}
+        {/* Circular Gauge Display */}
+        <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
+          {/* Animated concentric pulse when running */}
+          {isRunning && (
+            <div
+              className={`absolute inset-0 rounded-full animate-ping opacity-10 pointer-events-none ${
+                mode === 'work' ? 'bg-indigo-500' : 'bg-emerald-500'
+              }`}
+              style={{ animationDuration: '3s' }}
+            />
+          )}
+
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 280 280">
+            {/* Background Track */}
+            <circle
+              cx="140"
+              cy="140"
+              r={circleRadius}
+              className="stroke-slate-950 fill-none"
+              strokeWidth="12"
+            />
+            {/* Animated Progress Arc */}
+            <circle
+              cx="140"
+              cy="140"
+              r={circleRadius}
+              className={`fill-none transition-all duration-500 ${
+                mode === 'work' ? 'stroke-indigo-500' : 'stroke-emerald-500'
+              }`}
+              strokeWidth="12"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+            />
+          </svg>
+
+          {/* Time & Active State in Center */}
+          <div className="absolute flex flex-col items-center justify-center text-center">
+            <div className="text-6xl sm:text-7xl font-black font-mono-numbers tracking-tight text-white drop-shadow-lg select-none">
+              {formattedTime}
+            </div>
+            <div className="text-xs font-semibold text-slate-400 mt-1 flex items-center gap-1.5">
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: activeSubject.color }}
+              />
+              <span className="text-white">{activeSubject.name}</span>
+            </div>
+            <span className="text-[10px] text-slate-500 mt-0.5 font-mono-numbers">
+              {Math.round(progressPercent)}% transcurrido
+            </span>
           </div>
         </div>
 
-        {/* Mode subtitle */}
-        <p className="text-sm font-medium text-slate-400 mt-2">
-          {mode === 'work' ? (
-            <span className="flex items-center gap-1.5 text-indigo-400">
-              <Sparkles className="w-4 h-4" />
-              Sesión de enfoque intenso en <strong className="text-white">{activeSubject.name}</strong>
-            </span>
+        {/* Action Buttons Row */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+          {!isRunning ? (
+            <button
+              onClick={handleStart}
+              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-600/30 text-base"
+            >
+              <Play className="w-5 h-5 fill-current" />
+              <span>{sessionStartTime ? 'Reanudar Foco' : 'Iniciar 25 Minutos'}</span>
+            </button>
           ) : (
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <Coffee className="w-4 h-4" />
-              Descanso activo (estírate, toma agua, aléjate de las pantallas)
-            </span>
+            <button
+              onClick={handlePause}
+              className="flex items-center gap-2.5 px-8 py-3.5 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all border border-slate-700 text-base shadow-lg"
+            >
+              <Pause className="w-5 h-5" />
+              <span>Pausar</span>
+            </button>
           )}
-        </p>
 
-        {/* Linear Progress Bar */}
-        <div className="w-full max-w-md bg-slate-950 h-2 rounded-full mt-5 overflow-hidden border border-slate-800">
-          <div
-            className={`h-full transition-all duration-300 ${
-              mode === 'work' ? 'bg-gradient-to-r from-indigo-500 to-cyan-400' : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-            }`}
-            style={{ width: `${progressPercent}%` }}
+          <button
+            onClick={handleReset}
+            className="p-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            title="Reiniciar temporizador"
+          >
+            <RotateCcw className="w-5 h-5" />
+          </button>
+
+          {/* S.O.S. Micro-Pause Button when studying */}
+          {mode === 'work' && isRunning && (
+            <button
+              onClick={() => {
+                setIsRunning(false);
+                setShowSosModal(true);
+              }}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-bold text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-800/60 transition-all shadow-sm"
+              title="Pausa guiada si tienes ganas de mirar el celular"
+            >
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span>S.O.S. Celular</span>
+            </button>
+          )}
+
+          {/* Distraction / Abandonment Trigger during work mode */}
+          {mode === 'work' && isRunning && (
+            <button
+              onClick={handleTriggerAbandon}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 transition-all"
+              title="Registrar abandono por celular"
+            >
+              <Smartphone className="w-4 h-4 text-rose-400" />
+              <span>Abandonar</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Ambient Soundscape Synthesizer Deck */}
+      {!isZenFullscreen && (
+        <div className="mt-5 p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 relative z-10">
+          <div className="flex items-center justify-between mb-2 text-xs">
+            <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
+              <Radio className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Paisajes Sonoros Nativos (Foco & TDAH)</span>
+            </div>
+            {selectedAmbient !== 'none' && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-400">Volumen:</span>
+                <input
+                  type="range"
+                  min="0.05"
+                  max="1"
+                  step="0.05"
+                  value={ambientVolume}
+                  onChange={e => handleAmbientVolumeChange(Number(e.target.value))}
+                  className="w-16 accent-cyan-400 h-1 bg-slate-800 rounded-lg cursor-pointer"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-xs">
+            {[
+              { type: 'none', label: 'Silencio', icon: VolumeX },
+              { type: 'rain', label: 'Lluvia Zen', icon: CloudRain },
+              { type: 'whitenoise', label: 'Ruido Marrón', icon: Waves },
+              { type: 'binaural', label: '40Hz Gamma', icon: Radio },
+              { type: 'zen', label: 'Viento Suave', icon: Wind },
+            ].map(item => {
+              const Icon = item.icon;
+              const isCurrent = selectedAmbient === item.type;
+              return (
+                <button
+                  key={item.type}
+                  onClick={() => handleSelectAmbient(item.type as AmbientSoundType)}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-medium border transition-all ${
+                    isCurrent
+                      ? 'border-cyan-500 bg-cyan-950/50 text-cyan-200 font-bold shadow-sm'
+                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700'
+                  }`}
+                >
+                  <Icon className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Gamified Focus Tree & Forest Progress */}
+      {!isZenFullscreen && (
+        <div className="mt-4 relative z-10">
+          <FocusTree
+            progressPercent={progressPercent}
+            isRunning={isRunning}
+            isCompleted={treeCompleted}
+            isAbandoned={treeAbandoned}
+            totalCompletedSessions={totalCompletedSessions}
+            totalAbandonedSessions={totalAbandonedSessions}
           />
         </div>
-      </div>
+      )}
 
-      {/* Primary Action Buttons */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mt-6 relative z-10">
-        {!isRunning ? (
-          <button
-            onClick={handleStart}
-            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all shadow-lg shadow-indigo-600/30 text-base"
-          >
-            <Play className="w-5 h-5 fill-current" />
-            <span>{sessionStartTime ? 'Reanudar' : 'Iniciar Foco'}</span>
-          </button>
-        ) : (
-          <button
-            onClick={handlePause}
-            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all border border-slate-700 text-base"
-          >
-            <Pause className="w-5 h-5" />
-            <span>Pausar</span>
-          </button>
-        )}
+      {/* MODAL 1: S.O.S. Tentación Celular */}
+      <AntiDistractionSosModal
+        isOpen={showSosModal}
+        onClose={() => setShowSosModal(false)}
+        onOvercomeTemptation={() => {
+          setShowSosModal(false);
+          setIsRunning(true);
+        }}
+        onConfirmAbandon={() => {
+          setShowSosModal(false);
+          handleConfirmAbandon();
+        }}
+      />
 
-        <button
-          onClick={handleReset}
-          className="p-3.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-colors"
-          title="Reiniciar temporizador"
-        >
-          <RotateCcw className="w-5 h-5" />
-        </button>
-
-        {/* Distraction / Abandonment Trigger during work mode */}
-        {mode === 'work' && isRunning && (
-          <button
-            onClick={handleTriggerAbandon}
-            className="flex items-center gap-2 px-4 py-3.5 rounded-xl text-xs font-semibold text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 active:scale-95 transition-all"
-            title="Registrar distracción o abandono por celular"
-          >
-            <Smartphone className="w-4 h-4 text-rose-400" />
-            <span>¡Miré el celular! / Abandonar</span>
-          </button>
-        )}
-      </div>
-
-      {/* Phone Commitment toggle banner */}
-      <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 relative z-10">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Regla de oro: Celular con pantalla abajo y en silencio.</span>
-        </div>
-        <button
-          onClick={() => setPhoneShieldActive(!phoneShieldActive)}
-          className="text-indigo-400 hover:text-indigo-300 font-medium underline-offset-4 hover:underline"
-        >
-          {phoneShieldActive ? 'Blindaje Activo' : 'Activar Blindaje'}
-        </button>
-      </div>
-
-      {/* MODAL 1: Distracción / Abandono (P0 / M2) */}
+      {/* MODAL 2: Distracción / Abandono */}
       {showDistractionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
@@ -459,7 +682,7 @@ export const Timer: React.FC<TimerProps> = ({
               <button
                 onClick={() => {
                   setShowDistractionModal(false);
-                  setIsRunning(true); // continue
+                  setIsRunning(true);
                 }}
                 className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
               >
@@ -476,7 +699,7 @@ export const Timer: React.FC<TimerProps> = ({
         </div>
       )}
 
-      {/* MODAL 2: Completitud Exitosa (25 min cumplidos) */}
+      {/* MODAL 3: Completitud Exitosa (25 min cumplidos) */}
       {showCompletionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
@@ -486,7 +709,7 @@ export const Timer: React.FC<TimerProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">¡25 Minutos de Enfoque Puro!</h3>
-                <p className="text-xs text-emerald-300">¡Venciste la tentación del celular en esta sesión!</p>
+                <p className="text-xs text-emerald-300">¡Tu árbol de concentración ha florecido y sumas +25 XP!</p>
               </div>
             </div>
 
@@ -501,7 +724,7 @@ export const Timer: React.FC<TimerProps> = ({
                     onClick={() => setFocusRating(quality)}
                     className={`py-2 px-3 rounded-xl border font-medium capitalize transition-all ${
                       focusRating === quality
-                        ? 'border-emerald-500 bg-emerald-950/50 text-emerald-200'
+                        ? 'border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold'
                         : 'border-slate-800 bg-slate-950/50 text-slate-400 hover:border-slate-700'
                     }`}
                   >
@@ -530,7 +753,7 @@ export const Timer: React.FC<TimerProps> = ({
                 className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Registrar Sesión e Iniciar 5 min de Descanso</span>
+                <span>Guardar Árbol Florecido e Iniciar 5 min de Descanso</span>
               </button>
             </div>
           </div>
